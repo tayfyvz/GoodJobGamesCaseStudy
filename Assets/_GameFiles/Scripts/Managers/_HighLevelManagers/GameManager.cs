@@ -9,6 +9,7 @@ namespace TadPoleFramework
     public class GameManager : BaseGameManager
     {
         [SerializeField] private LevelManager levelManager;
+        [SerializeField] private CubesManager cubesManager;
         private GameModel gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
@@ -24,12 +25,15 @@ namespace TadPoleFramework
             IMediator mediator = new BaseMediator();
             levelManager.InjectMediator(mediator);
             levelManager.InjectManager(this);
+            
+            cubesManager.InjectMediator(mediator);
+            cubesManager.InjectManager(this);
         }
 
         protected override void Start()
         {
             base.Start();
-            /*levelManager.InjectModel(gameModel);*/
+            levelManager.InjectModel(gameModel);
         }
 
         public void InjectModel(GameModel gameModel)
