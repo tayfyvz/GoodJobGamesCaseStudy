@@ -10,7 +10,8 @@ namespace TadPoleFramework
     {
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private CubesManager cubesManager;
-        private GameModel gameModel;
+        [SerializeField] private CameraManager cameraManager;
+        private GameModel _gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
             switch (baseEventArgs)
@@ -28,23 +29,26 @@ namespace TadPoleFramework
             
             cubesManager.InjectMediator(mediator);
             cubesManager.InjectManager(this);
+            
+            cameraManager.InjectMediator(mediator);
+            cameraManager.InjectManager(this);
         }
 
         protected override void Start()
         {
             base.Start();
-            levelManager.InjectModel(gameModel);
+            levelManager.InjectModel(_gameModel);
         }
 
         public void InjectModel(GameModel gameModel)
         {
-            this.gameModel = gameModel;
-            this.gameModel.PropertyChanged += GameMOdelProperetyChangedHandler;
+            this._gameModel = gameModel;
+            this._gameModel.PropertyChanged += GameMOdelProperetyChangedHandler;
         }
 
         private void GameMOdelProperetyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(gameModel.InstantScore))
+            if (e.PropertyName == nameof(_gameModel.Level))
             {
                 
             }

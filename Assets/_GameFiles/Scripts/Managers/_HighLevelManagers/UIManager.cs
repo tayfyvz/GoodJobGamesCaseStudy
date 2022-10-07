@@ -37,7 +37,7 @@ public class UIManager : BaseUIManager
 
     private void GameMOdelProperetyChangedHandler(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(gameModel.InstantScore))
+        if (e.PropertyName == nameof(gameModel.Score))
         {
             
         }

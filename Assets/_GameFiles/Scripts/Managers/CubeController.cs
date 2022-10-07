@@ -9,7 +9,7 @@ namespace TadPoleFramework
     {
         public int colorID;
         [SerializeField] private SpriteRenderer spriteRenderer;
-        public bool isCubeChecked, isGroup;
+        public bool isCubeChecked;
         private bool _isSelected, _isHit;
         private List<float> _angleList = new List<float>
         {
@@ -26,16 +26,64 @@ namespace TadPoleFramework
         {
             spriteRenderer.sprite = sprite;
         }
-        public void IconChecker()
+        public List<CubeController> IconChecker()
         {
-            
+            List<CubeController> connectedCubes = new List<CubeController>();
+            connectedCubes.Add(this);
+            isCubeChecked = true;
+            for (int i = 0; i < _angleList.Count; i++)
+            {
+                CubeController cube = CloseDistRaycast(_angleList[i], colorID);
+                if (cube != null)
+                {
+                    if (!cube.isCubeChecked)
+                    {
+                        cube.isCubeChecked = true;
+                        List<CubeController> cc = cube.AroundChecker();
+                        for (int j = 0; j < cc.Count; j++)
+                        {
+                            if (!connectedCubes.Contains(cc[j]))
+                            {
+                                connectedCubes.Add(cc[j]);
+                            }
+                        }
+                    }
+                }
+            }
+            return connectedCubes;
+        }
+
+        private List<CubeController> AroundChecker()
+        {
+            List<CubeController> cubeControllers = new List<CubeController>();
+            for (int i = 0; i < _angleList.Count; i++)
+            {
+                CubeController cube = CloseDistRaycast(_angleList[i], colorID);
+                if (cube != null)
+                {
+                    if (!cube.isCubeChecked)
+                    {
+                        cube.isCubeChecked = true;
+                        List<CubeController> cc = cube.AroundChecker();
+                        
+                        for (int j = 0; j < cc.Count; j++)
+                        {
+                            if (!cubeControllers.Contains(cc[j]))
+                            {
+                                cubeControllers.Add(cc[j]);
+                            }
+                        }
+                    }
+                }
+            }
+            cubeControllers.Add(this);
+            return cubeControllers;
         }
         private void OnMouseDown()
         {
             if (!_isSelected/* && !isLocked && isPlaced*/)
             {
-                StartCoroutine(OnCubeSelected()); 
-                //BroadcastUpward(new BallIsClickedEventArgs());
+                OnCubeSelected();
             }
         }
         private void RayThrower()
@@ -49,7 +97,7 @@ namespace TadPoleFramework
                     {
                         _isHit = true;
                         cube._isHit = true;
-                        StartCoroutine(cube.OnCubeSelected());
+                        cube.OnCubeSelected();
                     } 
                     else if(cube._isSelected && i == _angleList.Count -1)
                     {
@@ -58,7 +106,7 @@ namespace TadPoleFramework
                 }
             }
         }
-        private CubeController CloseDistRaycast(float angle, int colorid)
+        private CubeController CloseDistRaycast(float angle, int colorId)
         {
             RaycastHit hit;
             Transform transform1;
@@ -67,23 +115,23 @@ namespace TadPoleFramework
         
             if (Physics.Raycast(transform.position, direction, out hit, 1f, 1 << 6))
             {
-                if (hit.transform.GetComponent<CubeController>().colorID == colorid)
+                if (hit.transform.GetComponent<CubeController>().colorID == colorId)
                 {
                     return hit.transform.GetComponent<CubeController>();
                 }
             }
             return null;
         }
-        IEnumerator OnCubeSelected()
+        private void OnCubeSelected()
         {
             _isSelected = true;
             RayThrower();
             if (_isHit)
             {
                 gameObject.SetActive(false);
-                BroadcastUpward(new CubeIsExplodeEventArgs(transform.position.x, transform.position.z, this));
+                Vector3 position = transform.position;
+                BroadcastUpward(new CubeIsExplodeEventArgs(position.x, position.z, this));
             }
-            yield return new WaitForSeconds(0);
         }
     }
 }

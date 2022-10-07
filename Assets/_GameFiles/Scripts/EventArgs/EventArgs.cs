@@ -1,10 +1,35 @@
+using System.Collections.Generic;
 using TadPoleFramework.Core;
+using UnityEngine;
 
 namespace TadPoleFramework
 {
     public class SceneStartedEventArgs : BaseEventArgs
     {
-        
+        public int ConditionA { get; set; }
+        public int ConditionB { get; set; }
+        public int ConditionC { get; set; }
+
+        public List<Sprite> Sprites { get; set; }
+        public SceneStartedEventArgs(List<Sprite> sprites, int a, int b, int c)
+        {
+            Sprites = sprites;
+            ConditionA = a;
+            ConditionB = b;
+            ConditionC = c;
+        }
+    }
+
+    public class CameraSetterEventArgs : BaseEventArgs
+    {
+        public int Column { get; set; }
+        public int Row { get; set; }
+
+        public CameraSetterEventArgs(int column, int row)
+        {
+            Column = column;
+            Row = row;
+        }
     }
 
     public class CubeControllerIsCreated : BaseEventArgs

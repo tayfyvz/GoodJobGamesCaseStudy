@@ -18,9 +18,9 @@ namespace TadPoleFramework
         [SerializeField] private int conditionC;
 
         [Header("Color Settings")]
-        [SerializeField] private int totalNumOfColors;
+        [Range(1, 6)] [SerializeField] private int totalNumOfColors;
         [SerializeField] private CubeController cubeControllerPrefab;
-        [SerializeField] private List<Sprite> defaultSprites = new List<Sprite>();
+        [SerializeField] private List<Sprite> sprites = new List<Sprite>();
 
         private GameModel _gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
@@ -28,7 +28,7 @@ namespace TadPoleFramework
             switch (baseEventArgs)
             {
                 case CubeIsExplodeEventArgs cubeIsExplodeEventArgs:
-                    Vector3 newCubePos = new Vector3(cubeIsExplodeEventArgs.Column, 0, 5 + cubeIsExplodeEventArgs.Row);
+                    Vector3 newCubePos = new Vector3(cubeIsExplodeEventArgs.Column, 0, rowLength + cubeIsExplodeEventArgs.Row);
                     CreateNewCube(newCubePos);
                     break;
             }
@@ -36,19 +36,22 @@ namespace TadPoleFramework
 
         protected override void Start()
         {
-            StartCoroutine(CreateBoard());
+            Broadcast(new SceneStartedEventArgs(sprites, conditionA, conditionB, conditionC));
+            Broadcast(new CameraSetterEventArgs(columnLength, rowLength));
+            /*StartCoroutine(CreateBoard());*/
+            CreateBoard();
             Broadcast(new BoardIsCreatedEventArgs());
         }
 
-        private IEnumerator CreateBoard()
+        private void CreateBoard()
         {
-            for (int i = 0; i < rowLength; i++)
+            for (int i = 0; i < columnLength; i++)
             {
-                for (int j = 0; j < columnLength; j++)
+                for (int j = 0; j < rowLength; j++)
                 {
                     Vector3 tempPos = new Vector3(i, 0, j);
                     CreateNewCube(tempPos);
-                    yield return new WaitForSeconds(.01f);
+                    /*yield return new WaitForSeconds(0f);*/
                 }
             }
         }
@@ -56,8 +59,8 @@ namespace TadPoleFramework
         private void CreateNewCube(Vector3 pos)
         {
             CubeController cc = Instantiate(cubeControllerPrefab, pos, Quaternion.identity);
-            int randomSpriteNum = UnityEngine.Random.Range(0, defaultSprites.Count);
-            cc.ChangeSprite(defaultSprites[randomSpriteNum]);
+            int randomSpriteNum = UnityEngine.Random.Range(0, totalNumOfColors);
+            cc.ChangeSprite(sprites[randomSpriteNum * 4]);
             cc.colorID = randomSpriteNum;
             Broadcast(new CubeControllerIsCreated(cc));
         }
@@ -70,7 +73,7 @@ namespace TadPoleFramework
         {
             if (e.PropertyName == nameof(_gameModel.Level))
             {
-                
+                Debug.Log("VAR");
             }
         }
     }
