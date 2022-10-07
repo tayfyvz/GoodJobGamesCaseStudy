@@ -14,10 +14,7 @@ namespace TadPoleFramework
         private GameModel _gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
-            switch (baseEventArgs)
-            {
-                
-            }
+
         }
 
         protected override void Awake()
@@ -26,6 +23,7 @@ namespace TadPoleFramework
             IMediator mediator = new BaseMediator();
             levelManager.InjectMediator(mediator);
             levelManager.InjectManager(this);
+            levelManager.cubesManager = cubesManager;
             
             cubesManager.InjectMediator(mediator);
             cubesManager.InjectManager(this);

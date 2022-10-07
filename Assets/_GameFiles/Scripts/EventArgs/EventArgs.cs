@@ -24,14 +24,12 @@ namespace TadPoleFramework
     {
         public int Column { get; set; }
         public int Row { get; set; }
-
         public CameraSetterEventArgs(int column, int row)
         {
             Column = column;
             Row = row;
         }
     }
-
     public class CubeControllerIsCreated : BaseEventArgs
     {
         public CubeController CubeController { get; set; }
@@ -43,9 +41,7 @@ namespace TadPoleFramework
     }
     public class BoardIsCreatedEventArgs : BaseEventArgs
     {
-        
     }
-
     public class CubeIsExplodeEventArgs : BaseEventArgs
     {
         public CubeController CubeController { get; set; }
@@ -57,6 +53,15 @@ namespace TadPoleFramework
             Column = column;
             Row = row;
             CubeController = cubeController;
+        }
+    }
+
+    public class ShuffleCubesEventArgs : BaseEventArgs
+    {
+        public List<CubeController> CubeControllers { get; set; }
+        public ShuffleCubesEventArgs(List<CubeController> cubeControllers)
+        {
+            CubeControllers = cubeControllers;
         }
     }
 }

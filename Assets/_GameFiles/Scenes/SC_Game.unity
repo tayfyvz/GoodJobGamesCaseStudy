@@ -214,7 +214,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 363091293}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -5}
+  m_LocalPosition: {x: 0, y: 0, z: -3}
   m_LocalScale: {x: 18.888, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -712,12 +712,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f4b912a1e867664091e7bbb438a1ea6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rowLength: 10
-  columnLength: 10
+  rowLength: 3
+  columnLength: 3
   conditionA: 1
   conditionB: 2
   conditionC: 3
-  totalNumOfColors: 4
+  totalNumOfColors: 6
   cubeControllerPrefab: {fileID: 1241115334297904905, guid: 9dda5f8c387ec704c948b16fdab14232,
     type: 3}
   sprites:
@@ -745,6 +745,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 0d83a55054cc4e64cabb71e98b57f568, type: 3}
   - {fileID: 21300000, guid: f03b946732780584f97cf13c01d1e899, type: 3}
   - {fileID: 21300000, guid: 4d4fe643e8c42434abae486f37ebca9f, type: 3}
+  cubesManager: {fileID: 0}
 --- !u!1 &1655240549
 GameObject:
   m_ObjectHideFlags: 0

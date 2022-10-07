@@ -9,35 +9,24 @@ public class UIManager : BaseUIManager
 {
     [SerializeField] private GameViewPresenter gameViewPresenter;
     
-    private GameModel gameModel;
+    private GameModel _gameModel;
     protected override void Awake()
     {
         base.Awake();
         gameViewPresenter.InjectManager(this);
     }
-
-    protected override void Start()
-    {
-        base.Start();
-        
-    }
-
     public override void Receive(BaseEventArgs baseEventArgs)
     {
-        switch (baseEventArgs)
-        {
-            
-        }
     }
     public void InjectModel(GameModel gameModel)
     {
-        this.gameModel = gameModel;
-        this.gameModel.PropertyChanged += GameMOdelProperetyChangedHandler;
+        this._gameModel = gameModel;
+        this._gameModel.PropertyChanged += GameMOdelProperetyChangedHandler;
     }
 
     private void GameMOdelProperetyChangedHandler(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(gameModel.Score))
+        if (e.PropertyName == nameof(_gameModel.Score))
         {
             
         }

@@ -7,8 +7,8 @@ namespace TadPoleFramework
 {
     public class CubesManager : BaseManager
     {
+        private List<Sprite> _sprites = new List<Sprite>();
         private List<CubeController> _cubes = new List<CubeController>();
-        [SerializeField] private List<Sprite> _sprites = new List<Sprite>();
         private int _a, _b, _c;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
@@ -28,9 +28,7 @@ namespace TadPoleFramework
                     StartCoroutine(CubesIconChecker());
                     break;
                 case CubeIsExplodeEventArgs cubeIsExplodeEventArgs:
-                    _cubes.Remove(cubeIsExplodeEventArgs.CubeController);
                     Broadcast(cubeIsExplodeEventArgs);
-                    CubesUnchecker();
                     StartCoroutine(CubesIconChecker());
                     break;
             }
@@ -39,9 +37,10 @@ namespace TadPoleFramework
         private IEnumerator CubesIconChecker()
         {
             yield return new WaitForSeconds(1.5f);
-            Debug.Log("CheckIcon");
+            bool isThereAnyGroup = false;
             for (int i = 0; i < _cubes.Count; i++)
             {
+                Debug.Log("VAR");
                 if (!_cubes[i].isCubeChecked)
                 { 
                     List<CubeController> cubeGroup = _cubes[i].IconChecker();
@@ -49,7 +48,10 @@ namespace TadPoleFramework
                     {
                         int count = cubeGroup.Count;
                         int colorID = cubeGroup[0].colorID;
-                        //change sprite of group
+                        if (count > 1)
+                        {
+                            isThereAnyGroup = true;
+                        }
                         if (count <= _a)
                         {
                             CubeGroupSpriteChanger(cubeGroup, (colorID * 4));
@@ -68,8 +70,19 @@ namespace TadPoleFramework
                         }
                     }
                 }
-                
             }
+            
+            CubesUnchecker();
+            
+            if (!isThereAnyGroup)
+            {
+                ShuffleEventArgsSender();
+            }
+        }
+
+        private void ShuffleEventArgsSender()
+        {
+            Broadcast(new ShuffleCubesEventArgs(_cubes));
         }
 
         private void CubeGroupSpriteChanger(List<CubeController> cubeGroup, int index)

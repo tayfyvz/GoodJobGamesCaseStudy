@@ -26,6 +26,12 @@ namespace TadPoleFramework
         {
             spriteRenderer.sprite = sprite;
         }
+        public void ResetBools()
+        {
+            _isSelected = false;
+            _isHit = false;
+            isCubeChecked = false;
+        }
         public List<CubeController> IconChecker()
         {
             List<CubeController> connectedCubes = new List<CubeController>();

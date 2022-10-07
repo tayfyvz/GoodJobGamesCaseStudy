@@ -1,9 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using TadPoleFramework;
 using TadPoleFramework.Core;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 namespace TadPoleFramework
 {
     public class LevelManager : BaseManager
@@ -22,6 +24,7 @@ namespace TadPoleFramework
         [SerializeField] private CubeController cubeControllerPrefab;
         [SerializeField] private List<Sprite> sprites = new List<Sprite>();
 
+        [HideInInspector] public CubesManager cubesManager;
         private GameModel _gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
@@ -29,7 +32,10 @@ namespace TadPoleFramework
             {
                 case CubeIsExplodeEventArgs cubeIsExplodeEventArgs:
                     Vector3 newCubePos = new Vector3(cubeIsExplodeEventArgs.Column, 0, rowLength + cubeIsExplodeEventArgs.Row);
-                    CreateNewCube(newCubePos);
+                    CreateNewCube(newCubePos, cubeIsExplodeEventArgs.CubeController);
+                    break;
+                case ShuffleCubesEventArgs shuffleCubesEventArgs:
+                    ShuffleCubes(shuffleCubesEventArgs.CubeControllers);
                     break;
             }
         }
@@ -51,18 +57,43 @@ namespace TadPoleFramework
                 {
                     Vector3 tempPos = new Vector3(i, 0, j);
                     CreateNewCube(tempPos);
-                    /*yield return new WaitForSeconds(0f);*/
                 }
             }
         }
 
         private void CreateNewCube(Vector3 pos)
         {
-            CubeController cc = Instantiate(cubeControllerPrefab, pos, Quaternion.identity);
+            CubeController cc = Instantiate(cubeControllerPrefab, pos, Quaternion.identity, cubesManager.transform);
+            Randomizer(cc);
+            Broadcast(new CubeControllerIsCreated(cc));
+        }
+        private void CreateNewCube(Vector3 pos, CubeController cubeController)
+        {
+            cubeController.transform.position = pos;
+            Randomizer(cubeController);
+            cubeController.ResetBools();
+            cubeController.gameObject.SetActive(true);
+        }
+
+        private void Randomizer(CubeController cc)
+        {
             int randomSpriteNum = UnityEngine.Random.Range(0, totalNumOfColors);
             cc.ChangeSprite(sprites[randomSpriteNum * 4]);
             cc.colorID = randomSpriteNum;
-            Broadcast(new CubeControllerIsCreated(cc));
+        }
+        private void ShuffleCubes(List<CubeController> cubeControllers)
+        {
+            cubeControllers.Shuffle();
+            
+            List<Vector3> newPositions = cubeControllers.Select(t => t.transform.position).ToList();
+
+            for (int i = 0; i < cubeControllers.Count; i++)
+            {
+                cubeControllers[i].transform.position = newPositions[i];
+                Randomizer(cubeControllers[i]);
+                cubeControllers[i].ResetBools();
+            }
+            
         }
         public void InjectModel(GameModel gameModel)
         {
@@ -73,7 +104,7 @@ namespace TadPoleFramework
         {
             if (e.PropertyName == nameof(_gameModel.Level))
             {
-                Debug.Log("VAR");
+                
             }
         }
     }
