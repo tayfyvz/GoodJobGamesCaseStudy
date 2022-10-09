@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using TadPoleFramework;
+using DG.Tweening;
 using TadPoleFramework.Core;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace TadPoleFramework
 {
@@ -22,9 +21,11 @@ namespace TadPoleFramework
         [Header("Color Settings")]
         [Range(1, 6)] [SerializeField] private int totalNumOfColors;
         [SerializeField] private CubeController cubeControllerPrefab;
-        [SerializeField] private List<Sprite> sprites = new List<Sprite>();
 
         [HideInInspector] public CubesManager cubesManager;
+        
+        private List<Sprite> sprites = new List<Sprite>();
+        
         private GameModel _gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
@@ -32,23 +33,35 @@ namespace TadPoleFramework
             {
                 case CubeIsExplodeEventArgs cubeIsExplodeEventArgs:
                     Vector3 newCubePos = new Vector3(cubeIsExplodeEventArgs.Column, 0, rowLength + cubeIsExplodeEventArgs.Row);
-                    CreateNewCube(newCubePos, cubeIsExplodeEventArgs.CubeController);
+                    PoolingNewCube(newCubePos, cubeIsExplodeEventArgs.CubeController);
                     break;
                 case ShuffleCubesEventArgs shuffleCubesEventArgs:
+                    BroadcastUpward(shuffleCubesEventArgs);
                     ShuffleCubes(shuffleCubesEventArgs.CubeControllers);
                     break;
             }
         }
-
         protected override void Start()
         {
+            if (totalNumOfColors >= rowLength * columnLength)
+            {
+                BroadcastUpward(new WarningSenderEventArgs("Total number of colors is greater then or equal to board size"));
+            }
+            else
+            {
+                BroadcastUpward(new WarningSenderEventArgs("You can change board size and other conditions from Level Manager"));
+
+            }
+            
+            sprites = new List<Sprite>(Resources.LoadAll<Sprite>("Icons"));
+            
             Broadcast(new SceneStartedEventArgs(sprites, conditionA, conditionB, conditionC));
             Broadcast(new CameraSetterEventArgs(columnLength, rowLength));
-            /*StartCoroutine(CreateBoard());*/
+            
             CreateBoard();
+            
             Broadcast(new BoardIsCreatedEventArgs());
         }
-
         private void CreateBoard()
         {
             for (int i = 0; i < columnLength; i++)
@@ -60,40 +73,41 @@ namespace TadPoleFramework
                 }
             }
         }
-
         private void CreateNewCube(Vector3 pos)
         {
             CubeController cc = Instantiate(cubeControllerPrefab, pos, Quaternion.identity, cubesManager.transform);
+            
             Randomizer(cc);
+            
             Broadcast(new CubeControllerIsCreated(cc));
         }
-        private void CreateNewCube(Vector3 pos, CubeController cubeController)
+        private void PoolingNewCube(Vector3 pos, CubeController cubeController)
         {
             cubeController.transform.position = pos;
             Randomizer(cubeController);
-            cubeController.ResetBools();
+            cubeController.ResetAllBool();
             cubeController.gameObject.SetActive(true);
-        }
-
-        private void Randomizer(CubeController cc)
-        {
-            int randomSpriteNum = UnityEngine.Random.Range(0, totalNumOfColors);
-            cc.ChangeSprite(sprites[randomSpriteNum * 4]);
-            cc.colorID = randomSpriteNum;
         }
         private void ShuffleCubes(List<CubeController> cubeControllers)
         {
-            cubeControllers.Shuffle();
+            List<CubeController> tempList = cubeControllers.ToList();
+
+            tempList.Shuffle();
             
-            List<Vector3> newPositions = cubeControllers.Select(t => t.transform.position).ToList();
+            List<Vector3> newPositions = tempList.Select(t => t.transform.position).ToList();
 
             for (int i = 0; i < cubeControllers.Count; i++)
             {
-                cubeControllers[i].transform.position = newPositions[i];
-                Randomizer(cubeControllers[i]);
-                cubeControllers[i].ResetBools();
+                cubeControllers[i].transform.DOMove(newPositions[i], 0.2f).SetEase(Ease.Linear);
+                cubeControllers[i].ResetAllBool();
             }
+        }
+        private void Randomizer(CubeController cc)
+        {
+            int randomSpriteNum = UnityEngine.Random.Range(0, totalNumOfColors);
             
+            cc.ChangeSprite(sprites[randomSpriteNum * 4]);
+            cc.colorID = randomSpriteNum;
         }
         public void InjectModel(GameModel gameModel)
         {

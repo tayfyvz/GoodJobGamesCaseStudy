@@ -11,8 +11,10 @@ namespace TadPoleFramework
             switch (baseEventArgs)
             {
                 case CameraSetterEventArgs cameraSetterEventArgs:
-                    camera.transform.position = new Vector3(((float)(cameraSetterEventArgs.Column - 1) / 2), 20, 0);
+                    camera.transform.position = new Vector3(((float)(cameraSetterEventArgs.Column - 1) / 2), 20, (cameraSetterEventArgs.Row /2) - 1);
+                    
                     int max = Mathf.Max(cameraSetterEventArgs.Column, cameraSetterEventArgs.Row);
+                    
                     camera.orthographicSize = max;
                     break;
             }

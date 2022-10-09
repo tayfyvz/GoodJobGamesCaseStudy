@@ -1,8 +1,5 @@
-using System.Collections;
 using TadPoleFramework.Core;
 using TadPoleFramework.UI;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace TadPoleFramework
 {
@@ -12,8 +9,17 @@ namespace TadPoleFramework
         {
             switch (baseEventArgs)
             {
-
+                case WarningSenderEventArgs warningSenderEventArgs:
+                    (view as GameView)?.ActivateWarningText(warningSenderEventArgs.Message);
+                    break;
+                case ShuffleCubesEventArgs shuffleCubesEventArgs:
+                    (view as GameView)?.ActivateShufflingText();
+                    break;
             }
+        }
+        public void OnShufflingButtonClick()
+        {
+            BroadcastUpward(new ShuffleButtonClickedEventArgs());
         }
     }
 }

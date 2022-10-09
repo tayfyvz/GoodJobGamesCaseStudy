@@ -3,7 +3,6 @@ using TadPoleFramework.Core;
 using TadPoleFramework.Game;
 using UnityEngine;
 
-
 namespace TadPoleFramework
 {
     public class GameManager : BaseGameManager
@@ -11,12 +10,23 @@ namespace TadPoleFramework
         [SerializeField] private LevelManager levelManager;
         [SerializeField] private CubesManager cubesManager;
         [SerializeField] private CameraManager cameraManager;
+        
         private GameModel _gameModel;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
-
+            switch (baseEventArgs)
+            {
+                case WarningSenderEventArgs warningSenderEventArgs:
+                    Broadcast(warningSenderEventArgs);
+                    break;
+                case ShuffleCubesEventArgs shuffleCubesEventArgs:
+                    Broadcast(shuffleCubesEventArgs);
+                    break;
+                case ShuffleButtonClickedEventArgs shuffleButtonClickedEventArgs:
+                    BroadcastDownward(shuffleButtonClickedEventArgs);
+                    break;
+            }
         }
-
         protected override void Awake()
         {
             base.Awake();
@@ -31,19 +41,16 @@ namespace TadPoleFramework
             cameraManager.InjectMediator(mediator);
             cameraManager.InjectManager(this);
         }
-
         protected override void Start()
         {
             base.Start();
             levelManager.InjectModel(_gameModel);
         }
-
         public void InjectModel(GameModel gameModel)
         {
             this._gameModel = gameModel;
             this._gameModel.PropertyChanged += GameMOdelProperetyChangedHandler;
         }
-
         private void GameMOdelProperetyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(_gameModel.Level))

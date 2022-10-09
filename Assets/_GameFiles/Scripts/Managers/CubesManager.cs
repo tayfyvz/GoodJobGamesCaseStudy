@@ -9,6 +9,7 @@ namespace TadPoleFramework
     {
         private List<Sprite> _sprites = new List<Sprite>();
         private List<CubeController> _cubes = new List<CubeController>();
+        
         private int _a, _b, _c;
         public override void Receive(BaseEventArgs baseEventArgs)
         {
@@ -25,22 +26,28 @@ namespace TadPoleFramework
                     _cubes.Add(cubeControllerIsCreated.CubeController);
                     break;
                 case BoardIsCreatedEventArgs boardIsCreatedEventArgs:
-                    StartCoroutine(CubesIconChecker());
+                    StartCoroutine(CubesIconChecker(.9f));
                     break;
                 case CubeIsExplodeEventArgs cubeIsExplodeEventArgs:
                     Broadcast(cubeIsExplodeEventArgs);
-                    StartCoroutine(CubesIconChecker());
+                    StartCoroutine(CubesIconChecker(.9f));
+                    break;
+                case ShuffleButtonClickedEventArgs shuffleButtonClickedEventArgs:
+                    ShuffleEventArgsSender();
+                    StartCoroutine(CubesIconChecker(.5f));
                     break;
             }
         }
-
-        private IEnumerator CubesIconChecker()
+        private IEnumerator CubesIconChecker(float duration)
         {
-            yield return new WaitForSeconds(1.5f);
+            BroadcastDownward(new InputThresholdEventArgs());
+            
+            yield return new WaitForSeconds(duration);
+            
             bool isThereAnyGroup = false;
+            
             for (int i = 0; i < _cubes.Count; i++)
             {
-                Debug.Log("VAR");
                 if (!_cubes[i].isCubeChecked)
                 { 
                     List<CubeController> cubeGroup = _cubes[i].IconChecker();
@@ -48,6 +55,7 @@ namespace TadPoleFramework
                     {
                         int count = cubeGroup.Count;
                         int colorID = cubeGroup[0].colorID;
+                        
                         if (count > 1)
                         {
                             isThereAnyGroup = true;
@@ -77,27 +85,29 @@ namespace TadPoleFramework
             if (!isThereAnyGroup)
             {
                 ShuffleEventArgsSender();
+                
+                StartCoroutine(CubesIconChecker(.5f));
+                yield break;
             }
+            
+            BroadcastDownward(new InputThresholdEndEventArgs());
         }
-
         private void ShuffleEventArgsSender()
         {
             Broadcast(new ShuffleCubesEventArgs(_cubes));
         }
-
         private void CubeGroupSpriteChanger(List<CubeController> cubeGroup, int index)
         {
-            for (int i = 0; i < cubeGroup.Count; i++)
+            foreach (var cubeController in cubeGroup)
             {
-                cubeGroup[i].ChangeSprite(_sprites[index]);
+                cubeController.ChangeSprite(_sprites[index]);
             }
         }
-
         private void CubesUnchecker()
         {
-            for (int i = 0; i < _cubes.Count; i++)
+            foreach (var cubeController in _cubes)
             {
-                _cubes[i].isCubeChecked = false;
+                cubeController.isCubeChecked = false;
             }
         }
     }
